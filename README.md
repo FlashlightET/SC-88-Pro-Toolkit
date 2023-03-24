@@ -21,6 +21,8 @@ Gui is nowhere near complete but I'm trying to prototype it out. I have no exper
 
 [SC-88Pro LCD SysEx Generator](http://robbi-985.homeip.net/blog/?p=1352) - Generate SysEx for graphic pages and text with checksum. Also can decode graphic/text messages and fix their checksums.
 
+[Serval Neso](https://www.amazon.com/gp/product/B075NL6YQ6) - Helps me make my midis sound good(? debatable)
+
 ## Sources for Information
 SC-88 Pro Itself
 
