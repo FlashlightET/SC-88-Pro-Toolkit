@@ -1,6 +1,3 @@
-from tkinter import *
-from tkinter import ttk
-
 def generate_sysex(address,data,mido_event=False):
     header=['41','10','42','12'] #Hex
     chktmp=0
