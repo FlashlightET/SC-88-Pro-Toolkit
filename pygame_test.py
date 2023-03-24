@@ -1,6 +1,9 @@
 import pygame
 import math
 import random
+import sysex_generator
+import mido
+outport = mido.open_output('USB MIDI Interface 2')
 # pygame setup
 pygame.init()
 
@@ -8,6 +11,7 @@ awesomeWindowWidth=1000
 awesomeWindowHeight=480
 
 screen = pygame.display.set_mode((awesomeWindowWidth, awesomeWindowHeight))
+pygame.scrap.init()
 clock = pygame.time.Clock()
 running = True
 
@@ -35,7 +39,7 @@ buttonSEImg=pygame.image.load('gui_resources\\button_SE.png')
 buttonSImg=pygame.image.load('gui_resources\\button_S.png')
 buttonSWImg=pygame.image.load('gui_resources\\button_SW.png')
 buttonWImg=pygame.image.load('gui_resources\\button_W.png')
-
+import pyperclip
 buttons=['Turn on EFX',
          'Set the EFX type',
          'EQ Settings',
@@ -52,11 +56,54 @@ buttons=['Turn on EFX',
 
 efxParams=[]
 
+efxtypes=[[['00','00'],'Thru'],
+[['01','00'],'Stereo EQ'],
+[['01','01'],'Spectrum'],
+[['01','02'],'Enhancer'],
+[['01','03'],'Humanizer'],
+[['01','10'],'Overdrive'],
+[['01','11'],'Distortion'],
+[['01','20'],'Phaser'],
+[['01','21'],'Auto Wah'],
+[['01','22'],'Rotary'],
+[['01','23'],'Stereo Flanger'],
+[['01','24'],'Step Flanger'],
+[['01','25'],'Tremolo'],
+[['01','26'],'Auto Pan'],
+[['01','30'],'Compressor'],
+[['01','31'],'Limiter'],
+[['01','40'],'Hexa Chorus'],
+[['01','41'],'Tremolo Chorus'],
+[['01','42'],'Stereo Chorus'],
+[['01','43'],'Space D'],
+[['01','44'],'3D Chorus'],
+[['01','50'],'Stereo Delay'],
+[['01','51'],'Mod Delay'],
+[['01','52'],'3-Tap Delay'],
+[['01','53'],'4-Tap Delay'],
+[['01','54'],'Tm Ctrl Delay'],
+[['01','55'],'Reverb'],
+[['01','56'],'Gate Reverb'],
+[['01','57'],'3D Delay'],
+[['01','60'],'2 Pitch Shifter'],
+[['01','61'],'Fb P Shifter'],
+[['01','70'],'3D Auto'],
+[['01','71'],'3D Manual'],
+[['01','72'],'Lo-Fi 1'],
+[['01','73'],'Lo-Fi 2']]
+
+
+
 for i in range(20):
     efxParams.append(['EfxParam#'+(str(i).zfill(2)),0])
 alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=!@#$%^&*()_+~`{}|[]\\:";\'<>?,./ '
 
 rolandFont=pygame.image.load('gui_resources\\RolandFontBG.png')
+
+def update_fps():
+    fps = str(int(clock.get_fps()))+' FPS'
+    fps_text = ButtonFont.render(fps, 1, pygame.Color("coral"))
+    return fps_text
 
 def renderRolandText(x,y,text):
     for _i in range(len(text)):
@@ -81,7 +128,7 @@ def renderButton(x,y,width,text):
             textSize+=14
     screen.blit(img, (x+(width/2)-(textSize/2)+1, y+5))
     clicked=False
-    if pygame.mouse.get_pressed()[0]:
+    if newMouse[0] and newMouse[0]!=oldMouse[0]:
         mousex,mousey=pygame.mouse.get_pos()
         if mousex>=x and mousex<=x+width:
             if mousey>=y and mousey<=y+28:
@@ -107,13 +154,13 @@ def renderButtonBetter(x,y,width,height,text):
 
     
     clicked=False
-    if pygame.mouse.get_pressed()[0]:
+    if newMouse[0] and newMouse[0]!=oldMouse[0]:
         mousex,mousey=pygame.mouse.get_pos()
         if mousex>=x and mousex<=x+width:
-            if mousey>=y and mousey<=y+28:
+            if mousey>=y and mousey<=y+height:
                 clicked=True
     return clicked
-
+efxtype=0
 def renderScreen(x,y,width,height):
     pygame.draw.rect(screen, '#FF6A00', (x,y,width,height))
     screen.blit(screenNWImg, (x,y))
@@ -131,10 +178,10 @@ def renderScreen(x,y,width,height):
         screen.blit(screenSImg, (x+3+_i,y+height-3))
     screen.blit(screenSEImg, (x+width-3,y+height-3))
     return False
-
+oldMouse=pygame.mouse.get_pressed()
 screener='efxtype' #its only called screener because screen was taken idk
 while running:
-    
+    newMouse=pygame.mouse.get_pressed()
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -143,7 +190,7 @@ while running:
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("#333333")
-
+    screen.blit(update_fps(), (10,0))
     # RENDER YOUR GAME HERE
     #Render Main Menu at top
     buttoncolumns=3
@@ -201,14 +248,52 @@ while running:
             #renderButtonBetter(_x,_y,buttonwidth,buttonheight,'sacks')
             renderScreen(_x,_y,buttonwidth,buttonheight)
             renderScreen(_x+182,_y,40,buttonheight)
-            renderButtonBetter(_x+184+40,_y,20,buttonheight/2,'sacks')
-            renderButtonBetter(_x+184+40,_y+buttonheight/2+1,20,buttonheight/2,'sacks')
+            upClicked=renderButtonBetter(_x+184+40,_y,20,buttonheight/2,'sacks')
+            downClicked=renderButtonBetter(_x+184+40,_y+buttonheight/2+1,20,buttonheight/2,'sacks')
+            if upClicked: efxParams[i][1]+=1
+            if downClicked: efxParams[i][1]+=-1
+            efxParams[i][1]=efxParams[i][1] % 128
             text=efxParams[i][0]+':'+str(efxParams[i][1])
             renderRolandText(_x+3,_y+3,text)
+        drap=16*11
+        renderScreen((awesomeWindowWidth/2)-(drap/2),260,drap,buttonheight)
+        renderRolandText((awesomeWindowWidth/2)-(drap/2)+3,260+3,efxtypes[efxtype][1])
+    buttoncolumns=2
+    buttonwidth=180
+    buttonheight=28
+    buttonpaddingx=4
+    buttonpaddingy=4
+    totalbuttonwidth=(buttonwidth+buttonpaddingx)*buttoncolumns
+    totalbuttonheight=(28+buttonpaddingy)*math.ceil(len(buttons)/buttoncolumns)
+    buttongroupx=(awesomeWindowWidth/2)-(totalbuttonwidth/2)
+    buttongroupy=430
+    btns=['Copy SysEx','Send SysEx']
+    willGenerate=False
+    willSend=False
+    for i in range(len(btns)):
+        buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,btns[i])
+        
+        if buttonclicked:
+            if btns[i]=='Copy SysEx': willGenerate=True
+            if btns[i]=='Send SysEx': willSend=True
+    if willGenerate:
+        if screener=='efxtype':
+            sysex='Set EFX:\n'+sysex_generator.generate_sysex(['40','03','00'],random.choice(efxtypes))
+            for i in range(len(efxParams)):
+                sysex+='\nSet Parameter #'+str(i)+':\n'+sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)])
+        pyperclip.copy(sysex)
+    if willSend:
+        if screener=='efxtype':
+            sysex=sysex_generator.generate_sysex(['40','03','00'],efxtypes[efxtype][0],True)
+            outport.send(mido.Message('sysex',data=sysex))
+            for i in range(len(efxParams)):
+                sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)],True)
+                outport.send(mido.Message('sysex',data=sysex))
+        
             
     # flip() the display to put your work on screen
     pygame.display.flip()
-
+    oldMouse=newMouse
     clock.tick(60)  # limits FPS to 60
 
 pygame.quit()
