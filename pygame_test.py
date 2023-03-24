@@ -46,7 +46,13 @@ def renderButton(x,y,width,text):
         else:
             textSize+=14
     screen.blit(img, (x+(width/2)-(textSize/2)+1, y+5))
-    return False
+    clicked=False
+    if pygame.mouse.get_pressed()[0]:
+        mousex,mousey=pygame.mouse.get_pos()
+        if mousex>=x and mousex<=x+width:
+            if mousey>=y and mousey<=y+28:
+                clicked=True
+    return clicked
 
 screener='mainmenu'
 while running:
@@ -73,7 +79,7 @@ while running:
         
         for i in range(len(buttons)):
             buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,buttons[i])
-
+            if buttonclicked: print(buttons[i])
     # flip() the display to put your work on screen
     pygame.display.flip()
 
