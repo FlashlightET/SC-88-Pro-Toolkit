@@ -3,7 +3,11 @@ import math
 import random
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((640, 480))
+
+awesomeWindowWidth=640
+awesomeWindowHeight=480
+
+screen = pygame.display.set_mode((awesomeWindowWidth, awesomeWindowHeight))
 clock = pygame.time.Clock()
 running = True
 
@@ -43,6 +47,8 @@ def renderButton(x,y,width,text):
             textSize+=14
     screen.blit(img, (x+(width/2)-(textSize/2)+1, y+5))
     return False
+
+screener='mainmenu'
 while running:
     
     # poll for events
@@ -55,17 +61,18 @@ while running:
     screen.fill("#333333")
 
     # RENDER YOUR GAME HERE
-    buttoncolumns=3
-    buttonwidth=150
-    buttonpaddingx=8
-    buttonpaddingy=4
-    totalbuttonwidth=(buttonwidth+buttonpaddingx)*buttoncolumns
-    totalbuttonheight=(28+buttonpaddingy)*math.ceil(len(buttons)/buttoncolumns)
-    buttongroupx=320-(totalbuttonwidth/2)
-    buttongroupy=240-(totalbuttonheight/2)
-    
-    for i in range(len(buttons)):
-        buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,buttons[i])
+    if screener=='mainmenu':
+        buttoncolumns=3
+        buttonwidth=150
+        buttonpaddingx=8
+        buttonpaddingy=4
+        totalbuttonwidth=(buttonwidth+buttonpaddingx)*buttoncolumns
+        totalbuttonheight=(28+buttonpaddingy)*math.ceil(len(buttons)/buttoncolumns)
+        buttongroupx=(awesomeWindowWidth/2)-(totalbuttonwidth/2)
+        buttongroupy=(awesomeWindowHeight/4)-(totalbuttonheight/2)
+        
+        for i in range(len(buttons)):
+            buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,buttons[i])
 
     # flip() the display to put your work on screen
     pygame.display.flip()
