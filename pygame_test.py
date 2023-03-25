@@ -40,6 +40,7 @@ buttonSImg=pygame.image.load('gui_resources\\button_S.png')
 buttonSWImg=pygame.image.load('gui_resources\\button_SW.png')
 buttonWImg=pygame.image.load('gui_resources\\button_W.png')
 import pyperclip
+import json
 buttons=['Turn on EFX',
          'Set the EFX type',
          'EQ Settings',
@@ -55,47 +56,10 @@ buttons=['Turn on EFX',
          'Scale Tuning']
 
 efxParams=[]
-
-efxtypes=[[['00','00'],'Thru'],
-[['01','00'],'Stereo EQ'],
-[['01','01'],'Spectrum'],
-[['01','02'],'Enhancer'],
-[['01','03'],'Humanizer'],
-[['01','10'],'Overdrive'],
-[['01','11'],'Distortion'],
-[['01','20'],'Phaser'],
-[['01','21'],'Auto Wah'],
-[['01','22'],'Rotary'],
-[['01','23'],'Stereo Flanger'],
-[['01','24'],'Step Flanger'],
-[['01','25'],'Tremolo'],
-[['01','26'],'Auto Pan'],
-[['01','30'],'Compressor'],
-[['01','31'],'Limiter'],
-[['01','40'],'Hexa Chorus'],
-[['01','41'],'Tremolo Chorus'],
-[['01','42'],'Stereo Chorus'],
-[['01','43'],'Space D'],
-[['01','44'],'3D Chorus'],
-[['01','50'],'Stereo Delay'],
-[['01','51'],'Mod Delay'],
-[['01','52'],'3-Tap Delay'],
-[['01','53'],'4-Tap Delay'],
-[['01','54'],'Tm Ctrl Delay'],
-[['01','55'],'Reverb'],
-[['01','56'],'Gate Reverb'],
-[['01','57'],'3D Delay'],
-[['01','60'],'2 Pitch Shifter'],
-[['01','61'],'Fb P Shifter'],
-[['01','70'],'3D Auto'],
-[['01','71'],'3D Manual'],
-[['01','72'],'Lo-Fi 1'],
-[['01','73'],'Lo-Fi 2']]
+with open('efx.json','r') as f:
+    efxtypes=json.load(f)
 
 
-
-for i in range(20):
-    efxParams.append(['EfxParam#'+(str(i).zfill(2)),0])
 alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=!@#$%^&*()_+~`{}|[]\\:";\'<>?,./ '
 
 rolandFont=pygame.image.load('gui_resources\\RolandFontBG.png')
@@ -133,6 +97,7 @@ def renderButton(x,y,width,text):
         if mousex>=x and mousex<=x+width:
             if mousey>=y and mousey<=y+28:
                 clicked=True
+    #print(clicked)
     return clicked
 
 def renderButtonBetter(x,y,width,height,text):
@@ -160,7 +125,7 @@ def renderButtonBetter(x,y,width,height,text):
             if mousey>=y and mousey<=y+height:
                 clicked=True
     return clicked
-efxtype=0
+efxtype=1
 def renderScreen(x,y,width,height):
     pygame.draw.rect(screen, '#FF6A00', (x,y,width,height))
     screen.blit(screenNWImg, (x,y))
@@ -180,7 +145,14 @@ def renderScreen(x,y,width,height):
     return False
 oldMouse=pygame.mouse.get_pressed()
 screener='efxtype' #its only called screener because screen was taken idk
+efxChange=True
 while running:
+    if efxChange:
+        efxParams=[]
+        for i in efxtypes['efx'][efxtype]['params']:
+            efxParams.append([i[0],0])
+        
+        efxChange=False
     newMouse=pygame.mouse.get_pressed()
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -201,7 +173,8 @@ while running:
     totalbuttonheight=(28+buttonpaddingy)*math.ceil(len(buttons)/buttoncolumns)
     buttongroupx=(awesomeWindowWidth/2)-(totalbuttonwidth/2)
     buttongroupy=(awesomeWindowHeight/4)-(totalbuttonheight/2)
-    
+    #print(oldMouse)
+    #print(newMouse)
     for i in range(len(buttons)):
         buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,buttons[i])
         if buttonclicked:
@@ -257,7 +230,16 @@ while running:
             renderRolandText(_x+3,_y+3,text)
         drap=16*11
         renderScreen((awesomeWindowWidth/2)-(drap/2),260,drap,buttonheight)
-        renderRolandText((awesomeWindowWidth/2)-(drap/2)+3,260+3,efxtypes[efxtype][1])
+        renderRolandText((awesomeWindowWidth/2)-(drap/2)+3,260+3,efxtypes['efx'][efxtype]['name'])
+        upClicked=renderButtonBetter((awesomeWindowWidth/2)-(drap/2)+drap,260,20,buttonheight/2,'sacks')
+        downClicked=renderButtonBetter((awesomeWindowWidth/2)-(drap/2)+drap,271,20,buttonheight/2,'sacks')
+        if upClicked:
+            efxChange=True
+            efxtype+=1
+        if downClicked:
+            efxChange=True
+            efxtype+=-1
+        
     buttoncolumns=2
     buttonwidth=180
     buttonheight=28
@@ -284,7 +266,11 @@ while running:
         pyperclip.copy(sysex)
     if willSend:
         if screener=='efxtype':
-            sysex=sysex_generator.generate_sysex(['40','03','00'],efxtypes[efxtype][0],True)
+            h1=efxtypes['efx'][efxtype]['hex'][0:1]
+            h2=efxtypes['efx'][efxtype]['hex'][2:3]
+            #print(h1)
+            #print(h2)
+            sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],True)
             outport.send(mido.Message('sysex',data=sysex))
             for i in range(len(efxParams)):
                 sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)],True)
