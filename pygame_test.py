@@ -144,8 +144,9 @@ def renderScreen(x,y,width,height):
     screen.blit(screenSEImg, (x+width-3,y+height-3))
     return False
 oldMouse=pygame.mouse.get_pressed()
-screener='efxtype' #its only called screener because screen was taken idk
+screener='sysreset' #its only called screener because screen was taken idk
 efxChange=True
+send=''
 while running:
     if efxChange:
         #initialize defaults for efx
@@ -351,6 +352,50 @@ while running:
                 doingStuff=True
     #if willGenerate:
         #print('wip')
+
+    if screener=='sysreset':
+        buttoncolumns=3
+        buttonwidth=150
+        buttonheight=20
+        buttonpaddingx=8
+        buttonpaddingy=4
+        totalbuttonwidth=(buttonwidth+buttonpaddingx)*buttoncolumns
+        totalbuttonheight=(28+buttonpaddingy)*math.ceil(len(buttons)/buttoncolumns)
+        buttongroupx=(awesomeWindowWidth/2)-(totalbuttonwidth/2)
+        buttongroupy=(awesomeWindowHeight/4)+(totalbuttonheight/2)+100
+        #print(oldMouse)
+        #print(newMouse)
+        sysbuttons=['GM Reset','GS Reset','SC-88 Reset']
+        
+        for i in range(len(sysbuttons)):
+            btx=buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns))
+            bty=buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns))
+            buttonclicked=renderButton(btx,bty,buttonwidth,sysbuttons[i])
+            if buttonclicked:
+                if i==0:
+                     send='GS'
+                if i==1:
+                     send='GS'
+                if i==2:
+                     send='88'
+        drap=16*11
+        renderScreen((awesomeWindowWidth/2)-(drap/2),360,drap,buttonheight)
+        renderRolandText((awesomeWindowWidth/2)-(drap/2)+3,360+3,send+' Reset')
+        if doingStuff:
+            toCopy=''
+            if send=='GS':
+                addr_=['40','00','7F']
+                valu_=['00']
+            if send=='88':
+                addr_=['00','00','7F']
+                valu_=['00']
+            if willSend:
+                sysex=sysex_generator.generate_sysex(addr_,valu_,True)
+                outport.send(mido.Message('sysex',data=sysex))
+            if willGenerate:
+                sysex=sysex_generator.generate_sysex(addr_,valu_,False)
+                toCopy=str(sysex)
+                pyperclip.copy(toCopy)
     
     if screener=='efxtype':
         if doingStuff:
