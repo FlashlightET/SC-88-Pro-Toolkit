@@ -150,7 +150,8 @@ while running:
     if efxChange:
         efxParams=[]
         for i in efxtypes['efx'][efxtype]['params']:
-            efxParams.append([i[0],0])
+            #print(i)
+            efxParams.append([i[0],i[1],i[2]])
         
         efxChange=False
     newMouse=pygame.mouse.get_pressed()
@@ -226,7 +227,48 @@ while running:
             if upClicked: efxParams[i][1]+=1
             if downClicked: efxParams[i][1]+=-1
             efxParams[i][1]=efxParams[i][1] % 128
-            text=efxParams[i][0]+':'+str(efxParams[i][1])
+            shownValue=str(efxParams[i][1])
+            vals=efxParams[i][2]
+            #print(efxParams[i])
+            
+            if type(vals)==str:
+                if vals=='':
+                    shownValue=''
+                if vals=='0.127':
+                    pass
+                if vals=='-12.12':
+                    vals=['-12',
+                          '-11',
+                          '-10',
+                          '- 9',
+                          '- 8',
+                          '- 7',
+                          '- 6',
+                          '- 5',
+                          '- 4',
+                          '- 3',
+                          '- 2',
+                          '- 1',
+                          '` 0',
+                          '+ 1',
+                          '+ 2',
+                          '+ 3',
+                          '+ 4',
+                          '+ 5',
+                          '+ 6',
+                          '+ 7',
+                          '+ 8',
+                          '+ 9',
+                          '+10',
+                          '+11',
+                          '+12']
+            if type(vals)==list:
+                #print(vals)
+                try:
+                    shownValue=str(vals[efxParams[i][1]])
+                except:
+                    shownValue='out of range!'
+            text=efxParams[i][0]+': '+shownValue
             renderRolandText(_x+3,_y+3,text)
         drap=16*11
         renderScreen((awesomeWindowWidth/2)-(drap/2),260,drap,buttonheight)
@@ -266,13 +308,14 @@ while running:
         pyperclip.copy(sysex)
     if willSend:
         if screener=='efxtype':
-            h1=efxtypes['efx'][efxtype]['hex'][0:1]
-            h2=efxtypes['efx'][efxtype]['hex'][2:3]
+            h1=efxtypes['efx'][efxtype]['hex'][0:2]
+            h2=efxtypes['efx'][efxtype]['hex'][2:4]
             #print(h1)
             #print(h2)
             sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],True)
             outport.send(mido.Message('sysex',data=sysex))
             for i in range(len(efxParams)):
+                #print(efxParams[i][1])
                 sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)],True)
                 outport.send(mido.Message('sysex',data=sysex))
         
