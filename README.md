@@ -59,6 +59,7 @@ SC-88 Pro Itself
 - MIDI Optimizer
     - Quantize pitch bend and CC events to be less frequent
     - Currently a dream due to how MIDI files are delta and I'm too confused by that to be able to write it
+    - No pitch bend/other certain events in the middle of noteoff and noteon events, specifically events that wouldnt be audible like changes in chorus send, pitch, modwheel, vibrato, volume, pan, etc
 - SC-88 Lyrics Generator
     - Similar to the Audacity method used in [Bad Canvas](https://github.com/FlashlightET/BadCanvas) but the timing is correct
     - Convert lyric tracks into sc-88 text?
