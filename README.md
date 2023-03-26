@@ -54,3 +54,10 @@ SC-88 Pro Itself
 [SomethingUnreal/Robbi-985](http://robbi-985.homeip.net/88pmidi/)
 
 [Roland](https://cdn.roland.com/assets/media/pdf/SC-88PRO_OM.pdf)
+
+## Future Ideas?
+- MIDI Optimizer
+    - Quantize pitch bend and CC events to be less frequent
+    - Currently a dream due to how MIDI files are delta and I'm too confused by that to be able to write it
+- SC-88 Lyrics Generator
+    - Similar to the Audacity method used in [Bad Canvas](https://github.com/FlashlightET/BadCanvas) but the timing is correct
