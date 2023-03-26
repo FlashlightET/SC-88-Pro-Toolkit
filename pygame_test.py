@@ -159,6 +159,8 @@ while running:
                 #efxParams[-1][1]=12 #They have their own defaults
             #if i[2]=='0.127':
                 #if i[1]==127: efxParams[-1][1]=127
+            if i[2]=='Balance':
+                pass # this is a placeholder for the future D> 0E - D=E - D 0<E balance visual
         efxChange=False
     newMouse=pygame.mouse.get_pressed()
     # poll for events
@@ -212,6 +214,9 @@ while running:
         pass #i dont need this if statemtn
     if screener=='efx':
         pass
+    willSend=False
+    willSendLite=False
+    doingStuff=False
     if screener=='efxtype':
         buttoncolumns=4
         buttonwidth=180
@@ -230,8 +235,16 @@ while running:
             renderScreen(_x+182,_y,40,buttonheight)
             upClicked=renderButtonBetter(_x+184+40,_y,20,buttonheight/2,'sacks')
             downClicked=renderButtonBetter(_x+184+40,_y+buttonheight/2+1,20,buttonheight/2,'sacks')
-            if upClicked: efxParams[i][1]+=1
-            if downClicked: efxParams[i][1]+=-1
+            if upClicked:
+                efxParams[i][1]+=1
+                willSendLite=True
+                changed=i
+                doingStuff=True
+            if downClicked:
+                efxParams[i][1]+=-1
+                willSendLite=True
+                changed=i
+                doingStuff=True
             efxParams[i][1]=efxParams[i][1] % 128
             shownValue=str(efxParams[i][1])
             vals=efxParams[i][2]
@@ -325,8 +338,7 @@ while running:
     buttongroupy=430
     btns=['Copy SysEx','Send SysEx']
     willGenerate=False
-    willSend=False
-    doingStuff=False
+    
     for i in range(len(btns)):
         buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,btns[i])
         
@@ -371,11 +383,15 @@ while running:
                     if willSend:
                         sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],True)
                         outport.send(mido.Message('sysex',data=sysex))
+                    if willSendLite:
+                        if changed==i:
+                            sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],True)
+                            outport.send(mido.Message('sysex',data=sysex))
                     if willGenerate:
                         sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],False)
                         toCopy+='\n\nSet EFX Parameter #'+str(i)+' ('+efxParams[i][0]+') to '+str(efxParams[i][1])+':\r\n'+str(sysex)
 
-            print(toCopy)
+            #print(toCopy)
             pyperclip.copy(toCopy)
             #else:
                 #print('fish moment')
