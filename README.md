@@ -18,6 +18,7 @@ In Progress:
     - GS Done
     - 88 Done
     - GM Not done
+
 Not Started:
 - Turn on EFX
 - EQ
