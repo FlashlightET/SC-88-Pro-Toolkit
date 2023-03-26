@@ -61,3 +61,4 @@ SC-88 Pro Itself
     - Currently a dream due to how MIDI files are delta and I'm too confused by that to be able to write it
 - SC-88 Lyrics Generator
     - Similar to the Audacity method used in [Bad Canvas](https://github.com/FlashlightET/BadCanvas) but the timing is correct
+    - Convert lyric tracks into sc-88 text?
