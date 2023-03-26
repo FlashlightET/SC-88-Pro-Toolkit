@@ -5,8 +5,8 @@ This is my toolkit that I am working on to generate SysEx (System Exclusive) mes
 See [Wiki](https://github.com/FlashlightET/SC-88-Pro-Toolkit/wiki) for some general info on SC-88Pro SysEx Events
 
 ## GUI
-![image](https://user-images.githubusercontent.com/29938499/227429444-89ab70a9-d616-461d-88e7-f0eaa94371e8.png)
-Gui is nowhere near complete but I'm trying to prototype it out. I have no experience with tkinter.
+![image](https://user-images.githubusercontent.com/29938499/227792765-bcf9d3de-614a-4c2d-a2a4-d096a797e448.png)
+Gui getting there.
 
 ## Other Useful Tools
 [Mido](https://github.com/mido/mido) - Python library for working with the MIDI interface and file format. Does not use F0 F7.
