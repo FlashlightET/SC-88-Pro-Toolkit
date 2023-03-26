@@ -5,8 +5,32 @@ This is my toolkit that I am working on to generate SysEx (System Exclusive) mes
 See [Wiki](https://github.com/FlashlightET/SC-88-Pro-Toolkit/wiki) for some general info on SC-88Pro SysEx Events
 
 ## GUI
-![image](https://user-images.githubusercontent.com/29938499/227792765-bcf9d3de-614a-4c2d-a2a4-d096a797e448.png)
+![image](https://user-images.githubusercontent.com/29938499/227798474-816ad98c-06a3-4017-8de2-1af7c46b4a20.png)
 Gui getting there.
+
+Progress:
+In Progress:
+- EFX Type & Parameters (~~30-40% Done)
+    - Parameter Defining
+    - Default Values
+    - Parameter Types
+- System Resets (67% Done)
+    - GS Done
+    - 88 Done
+    - GM Not done
+Not Started:
+- Turn on EFX
+- EQ
+- Global values
+- System parameters
+- Reverb
+- Delay
+- Chorus
+- Draw
+    - Will be for importing files, not a drawing screen as there is already a tool for that
+- Write
+- Part Parameters
+- Scale Tuning
 
 ## Other Useful Tools
 [Mido](https://github.com/mido/mido) - Python library for working with the MIDI interface and file format. Does not use F0 F7.
