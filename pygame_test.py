@@ -148,16 +148,17 @@ screener='efxtype' #its only called screener because screen was taken idk
 efxChange=True
 while running:
     if efxChange:
+        #initialize defaults for efx
         efxParams=[]
         for i in efxtypes['efx'][efxtype]['params']:
             #print(i)
             efxParams.append([i[0],i[1],i[2]])
-            if i[2]=='LCR':
-                efxParams[-1][1]=63 #set pan to center
-            if i[2]=='-12.12':
-                efxParams[-1][1]=12
-            if i[2]=='0.127':
-                efxParams[-1][1]=127
+            #if i[2]=='LCR':
+                #efxParams[-1][1]=64 #set pan to center
+            #if i[2]=='-12.12':
+                #efxParams[-1][1]=12 #They have their own defaults
+            #if i[2]=='0.127':
+                #if i[1]==127: efxParams[-1][1]=127
         efxChange=False
     newMouse=pygame.mouse.get_pressed()
     # poll for events
@@ -241,6 +242,8 @@ while running:
                     shownValue=''
                 if vals=='0.127':
                     pass #ideally this shouldnt be here but i felt  like it
+                if vals=='0.15':
+                    pass #ideally this shouldnt be here but i felt  like it
                 if vals=='-12.12':
                     vals=['-12',
                           '-11',
@@ -284,13 +287,16 @@ while running:
                             to_append='R '+str(num)
                         vals.append('R'+str(num))
                     #print(vals)
-                if '#' in efxParams[i][0] or '+' in efxParams[i][0]:
-                    shownValue='[X]'
-                    vals='0'
+                #if '#' in efxParams[i][0] or '+' in efxParams[i][0]:
+                    #shownValue='[X]'
+                    #vals='0'
             if type(vals)==list:
                 #print(vals)
                 try:
-                    shownValue=str(vals[efxParams[i][1]])
+                    if vals[0]=='L63':
+                        shownValue=str(vals[efxParams[i][1]-1]) #idk why its offset it just is i guess
+                    else:
+                        shownValue=str(vals[efxParams[i][1]])
                 except:
                     shownValue='out of range!'
             
@@ -320,27 +326,35 @@ while running:
     btns=['Copy SysEx','Send SysEx']
     willGenerate=False
     willSend=False
+    doingStuff=False
     for i in range(len(btns)):
         buttonclicked=renderButton(buttongroupx+((buttonwidth+buttonpaddingx)*(i%buttoncolumns)),buttongroupy+((28+buttonpaddingy)*math.floor(i/buttoncolumns)),buttonwidth,btns[i])
         
         if buttonclicked:
-            if btns[i]=='Copy SysEx': willGenerate=True
-            if btns[i]=='Send SysEx': willSend=True
-    if willGenerate:
-        if screener=='efxtype':
-            sysex='Set EFX:\n'+sysex_generator.generate_sysex(['40','03','00'],random.choice(efxtypes))
-            for i in range(len(efxParams)):
-                sysex+='\nSet Parameter #'+str(i)+':\n'+sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)])
-        pyperclip.copy(sysex)
-    if willSend:
-        if screener=='efxtype':
+            if btns[i]=='Copy SysEx':
+                willGenerate=True
+                doingStuff=True
+            if btns[i]=='Send SysEx':
+                willSend=True
+                doingStuff=True
+    #if willGenerate:
+        #print('wip')
+    
+    if screener=='efxtype':
+        if doingStuff:
             h1=efxtypes['efx'][efxtype]['hex'][0:2]
             h2=efxtypes['efx'][efxtype]['hex'][2:4]
             #print(h1)
             #print(h2)
-            sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],True)
-            outport.send(mido.Message('sysex',data=sysex))
-            print(len(efxParams))
+            toCopy='Set EFX Type:'
+            if willSend:
+                sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],True)
+                outport.send(mido.Message('sysex',data=sysex))
+            if willGenerate:
+                sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],False)
+                toCopy+='\r\n'+str(sysex)
+                #print(toCopy)
+            #print(len(efxParams))
             for i in range(20):
                 toSend=efxParams[i][1]
                 #print(efxParams[i][1])
@@ -348,17 +362,23 @@ while running:
                 isCringy=False
                 #if '#' in efxParams[i][0] or '+' in efxParams[i][0]: isCringy=True
                 if efxParams[i][0]=='': isCringy=True
-                print(efxParams[i][2])
+                #print(efxParams[i][2])
                 if efxParams[i][2]=='-12.12':
                     toSend+=52 # -12.12 is offset by 52
                 #print(isCringy)
                 if not isCringy:
                     #blah
-                    sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],True)
-                    print(sysex)
-                    outport.send(mido.Message('sysex',data=sysex))
-                #else:
-                    #print('fish moment')
+                    if willSend:
+                        sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],True)
+                        outport.send(mido.Message('sysex',data=sysex))
+                    if willGenerate:
+                        sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],False)
+                        toCopy+='\n\nSet EFX Parameter #'+str(i)+' ('+efxParams[i][0]+') to '+str(efxParams[i][1])+':\r\n'+str(sysex)
+
+            print(toCopy)
+            pyperclip.copy(toCopy)
+            #else:
+                #print('fish moment')
                 
         
             
