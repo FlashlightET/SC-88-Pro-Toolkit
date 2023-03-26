@@ -152,7 +152,12 @@ while running:
         for i in efxtypes['efx'][efxtype]['params']:
             #print(i)
             efxParams.append([i[0],i[1],i[2]])
-        
+            if i[2]=='LCR':
+                efxParams[-1][1]=63 #set pan to center
+            if i[2]=='-12.12':
+                efxParams[-1][1]=12
+            if i[2]=='0.127':
+                efxParams[-1][1]=127
         efxChange=False
     newMouse=pygame.mouse.get_pressed()
     # poll for events
@@ -235,7 +240,7 @@ while running:
                 if vals=='':
                     shownValue=''
                 if vals=='0.127':
-                    pass
+                    pass #ideally this shouldnt be here but i felt  like it
                 if vals=='-12.12':
                     vals=['-12',
                           '-11',
@@ -262,15 +267,36 @@ while running:
                           '+10',
                           '+11',
                           '+12']
+                if vals=='LCR':
+                    #im so sorry
+                    vals=[]
+                    for num in range(-63,0):
+                        #print(num)
+                        to_append=num
+                        if len(str(num))==2:
+                            to_append='L '+str(num)[1]
+                        vals.append('L'+str(num)[1:3])
+                    vals.append('C 0')
+                    for num in range(1,64):
+                        #print(num)
+                        to_append=num
+                        if len(str(num))==1:
+                            to_append='R '+str(num)
+                        vals.append('R'+str(num))
+                    #print(vals)
+                if '#' in efxParams[i][0] or '+' in efxParams[i][0]:
+                    shownValue='[X]'
+                    vals='0'
             if type(vals)==list:
                 #print(vals)
                 try:
                     shownValue=str(vals[efxParams[i][1]])
                 except:
                     shownValue='out of range!'
+            
             text=efxParams[i][0]+': '+shownValue
             renderRolandText(_x+3,_y+3,text)
-        drap=16*11
+        drap=16*11 #16=amount of chars in screen 11=width of each char in pixels counting the space
         renderScreen((awesomeWindowWidth/2)-(drap/2),260,drap,buttonheight)
         renderRolandText((awesomeWindowWidth/2)-(drap/2)+3,260+3,efxtypes['efx'][efxtype]['name'])
         upClicked=renderButtonBetter((awesomeWindowWidth/2)-(drap/2)+drap,260,20,buttonheight/2,'sacks')
@@ -314,10 +340,26 @@ while running:
             #print(h2)
             sysex=sysex_generator.generate_sysex(['40','03','00'],[h1,h2],True)
             outport.send(mido.Message('sysex',data=sysex))
-            for i in range(len(efxParams)):
+            print(len(efxParams))
+            for i in range(20):
+                toSend=efxParams[i][1]
                 #print(efxParams[i][1])
-                sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(efxParams[i][1],'x').zfill(2)],True)
-                outport.send(mido.Message('sysex',data=sysex))
+                #print(efxParams[i][0])
+                isCringy=False
+                #if '#' in efxParams[i][0] or '+' in efxParams[i][0]: isCringy=True
+                if efxParams[i][0]=='': isCringy=True
+                print(efxParams[i][2])
+                if efxParams[i][2]=='-12.12':
+                    toSend+=52 # -12.12 is offset by 52
+                #print(isCringy)
+                if not isCringy:
+                    #blah
+                    sysex=sysex_generator.generate_sysex(['40','03',format(3+i,'x').zfill(2)],[format(toSend,'x').zfill(2)],True)
+                    print(sysex)
+                    outport.send(mido.Message('sysex',data=sysex))
+                #else:
+                    #print('fish moment')
+                
         
             
     # flip() the display to put your work on screen
