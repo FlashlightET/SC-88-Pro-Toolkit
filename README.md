@@ -1,3 +1,7 @@
+# notice
+development on hold indefinitely cuz my sc-88pro broke a while ago sorry :( not read onlying the repo tho cause thatsa cringe (mario 
+voice)
+
 # SC-88-Pro-Toolkit
 EzoGaming's SC-88Pro Toolkit!!
 This is my toolkit that I am working on to generate SysEx (System Exclusive) messages for the Roland Sound Canvas SC-88 Pro. I was originally only concerned with checksum generation.
